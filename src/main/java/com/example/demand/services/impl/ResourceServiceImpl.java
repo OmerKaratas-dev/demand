@@ -1,28 +1,25 @@
 package com.example.demand.services.impl;
 
 import com.example.demand.enums.ResourceType;
-import com.example.demand.model.Resource;
+import com.example.demand.model.ResourceDTO;
 import com.example.demand.services.ResourceService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Slf4j
 public class ResourceServiceImpl implements ResourceService {
 
-    private Map<Long, Resource> resourceMap;
+    private Map<Long, ResourceDTO> resourceMap;
 
     public ResourceServiceImpl() {
 
         this.resourceMap = new HashMap<>();
 
-        Resource resource1 = Resource.builder()
+        ResourceDTO resourceDTO1 = ResourceDTO.builder()
                 .id(1L)
                 .name("Projector")
                 .type(ResourceType.HUMAN)
@@ -31,7 +28,7 @@ public class ResourceServiceImpl implements ResourceService {
                 .available(true)
                 .build();
 
-        Resource resource2 = Resource.builder()
+        ResourceDTO resourceDTO2 = ResourceDTO.builder()
                 .id(2L)
                 .name("Conference Room")
                 .type(ResourceType.MATERIAL)
@@ -40,7 +37,7 @@ public class ResourceServiceImpl implements ResourceService {
                 .available(true)
                 .build();
 
-        Resource resource3 = Resource.builder()
+        ResourceDTO resourceDTO3 = ResourceDTO.builder()
                 .id(3L)
                 .name("Laptop")
                 .type(ResourceType.FINANCIAL)
@@ -49,25 +46,25 @@ public class ResourceServiceImpl implements ResourceService {
                 .available(false)
                 .build();
 
-        resourceMap.put(resource1.getId(), resource1);
-        resourceMap.put(resource2.getId(), resource2);
-        resourceMap.put(resource3.getId(), resource3);
+        resourceMap.put(resourceDTO1.getId(), resourceDTO1);
+        resourceMap.put(resourceDTO2.getId(), resourceDTO2);
+        resourceMap.put(resourceDTO3.getId(), resourceDTO3);
     }
 
     @Override
-    public List<Resource> getResources() {
+    public List<ResourceDTO> getResources() {
         return new ArrayList<>(resourceMap.values());
     }
 
     @Override
-    public Resource getResource(Long id) {
+    public Optional<ResourceDTO> getResource(Long id) {
         log.debug("Get Beer by Id - in service. Id: " + id.toString());
-        return resourceMap.get(id);
+        return Optional.of(resourceMap.get(id));
     }
 
     @Override
-    public Resource createNewResource(Resource resource) {
-        Resource savedResource = Resource.builder()
+    public ResourceDTO createNewResource(ResourceDTO resourceDTO) {
+        ResourceDTO savedResourceDTO = ResourceDTO.builder()
                 .id(4L)
                 .name("Mobile")
                 .type(ResourceType.HUMAN)
@@ -76,45 +73,47 @@ public class ResourceServiceImpl implements ResourceService {
                 .available(true)
                 .build();
 
-        resourceMap.put(savedResource.getId(), savedResource);
-        return savedResource;
+        resourceMap.put(savedResourceDTO.getId(), savedResourceDTO);
+        return savedResourceDTO;
     }
 
     @Override
-    public void updateResource(Long resourceId, Resource resource) {
-        Resource existing = resourceMap.get(resourceId);
-        existing.setName(resource.getName());
-        existing.setDescription(resource.getDescription());
-        existing.setCode(resource.getCode());
-        existing.setAvailable(resource.getAvailable());
+    public Optional<ResourceDTO> updateResource(Long resourceId, ResourceDTO resourceDTO) {
+        ResourceDTO existing = resourceMap.get(resourceId);
+        existing.setName(resourceDTO.getName());
+        existing.setDescription(resourceDTO.getDescription());
+        existing.setCode(resourceDTO.getCode());
+        existing.setAvailable(resourceDTO.getAvailable());
 
         resourceMap.put(existing.getId(), existing);
+        return Optional.of(existing);
     }
 
     @Override
-    public void deleteResourceBy(Long resourceId) {
+    public Boolean deleteResourceBy(Long resourceId) {
         resourceMap.remove(resourceId);
+        return true;
     }
 
     @Override
-    public void patchResourceById(Long resourceId, Resource resource) {
+    public void patchResourceById(Long resourceId, ResourceDTO resourceDTO) {
 
-        Resource existing = resourceMap.get(resourceId);
+        ResourceDTO existing = resourceMap.get(resourceId);
 
-        if (StringUtils.hasText(resource.getName())){
-            existing.setName(resource.getName());
+        if (StringUtils.hasText(resourceDTO.getName())){
+            existing.setName(resourceDTO.getName());
         }
-        if (resource.getType() != null) {
-            existing.setType(resource.getType());
+        if (resourceDTO.getType() != null) {
+            existing.setType(resourceDTO.getType());
         }
-        if (resource.getCode() != null) {
-            existing.setCode(resource.getCode());
+        if (resourceDTO.getCode() != null) {
+            existing.setCode(resourceDTO.getCode());
         }
-        if (resource.getDescription() != null){
-            existing.setDescription(resource.getDescription());
+        if (resourceDTO.getDescription() != null){
+            existing.setDescription(resourceDTO.getDescription());
         }
-        if (resource.getAvailable() != null) {
-            existing.setAvailable(resource.getAvailable());
+        if (resourceDTO.getAvailable() != null) {
+            existing.setAvailable(resourceDTO.getAvailable());
         }
     }
 

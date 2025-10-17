@@ -1,19 +1,20 @@
 package com.example.demand.services;
 
-import com.example.demand.model.Resource;
+import com.example.demand.model.ResourceDTO;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ResourceService {
-    public List<Resource> getResources();
+    public List<ResourceDTO> getResources();
 
-    public Resource getResource(Long id);
+    public Optional<ResourceDTO> getResource(Long id);
 
-    public Resource createNewResource(Resource resource);
+    public ResourceDTO createNewResource(ResourceDTO resourceDTO);
 
-    void updateResource(Long resourceId, Resource resource);
+    Optional<ResourceDTO> updateResource(Long resourceId, ResourceDTO resourceDTO);
 
-    void deleteResourceBy(Long resourceId);
+    Boolean deleteResourceBy(Long resourceId);
 
-    void patchResourceById(Long resourceId, Resource resource);
+    void patchResourceById(Long resourceId, ResourceDTO resourceDTO);
 }

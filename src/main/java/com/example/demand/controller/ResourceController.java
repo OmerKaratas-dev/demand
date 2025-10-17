@@ -1,67 +1,77 @@
 package com.example.demand.controller;
 
-import com.example.demand.model.Resource;
+import com.example.demand.model.ResourceDTO;
 import com.example.demand.services.ResourceService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @Slf4j
 @AllArgsConstructor
-@RequestMapping("/api/v1/resource")
 public class ResourceController {
+
+    public static final String RESOURCE_PATH = "/api/v1/resource";
+    public static final String RESOURCE_PATH_ID = RESOURCE_PATH + "/{resourceId}";
+
     private final ResourceService resourceService;
 
-    @RequestMapping(method = RequestMethod.GET)
-    public List<Resource> listBeers(){
+    @GetMapping(RESOURCE_PATH)
+    public List<ResourceDTO> listResources(){
         return resourceService.getResources();
     }
 
-    @RequestMapping(value="{resourceId}" , method = RequestMethod.GET)
-    public Resource getResourceById(@PathVariable("resourceId") Long resourceId){
+    @GetMapping(value=RESOURCE_PATH_ID)
+    public ResourceDTO getResourceById(@PathVariable("resourceId") Long resourceId){
         log.debug("Get Resource by Id3 - in controller");
-        return resourceService.getResource(resourceId);
+        return resourceService.getResource(resourceId).orElseThrow(NotFoundException::new);
     }
 
-    @PostMapping
-    public ResponseEntity handlePost(@RequestBody Resource resource){
+    @PostMapping(value=RESOURCE_PATH)
+    public ResponseEntity handlePost(@Validated @RequestBody ResourceDTO resourceDTO){
         log.debug("Post Resource - in controller");
-        Resource savedResource = resourceService.createNewResource(resource);
+        ResourceDTO savedResourceDTO = resourceService.createNewResource(resourceDTO);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Location", "/api/v1/resource/"
-                + savedResource.getId().toString());
+        headers.add("Location", RESOURCE_PATH + "/"
+                + savedResourceDTO.getId().toString());
 
         return new ResponseEntity(headers, HttpStatus.CREATED);
     }
 
-    @PutMapping({"/{resourceId}"})
-    public ResponseEntity updateResourceById(@PathVariable("resourceId") Long resourceId, @RequestBody Resource resource){
+    @PutMapping(RESOURCE_PATH_ID)
+    public ResponseEntity updateResourceById(@PathVariable("resourceId") Long resourceId, @RequestBody ResourceDTO resourceDTO){
         log.debug("Update Resource by Id - in controller");
-        resourceService.updateResource(resourceId, resource);
+        if(resourceService.updateResource(resourceId, resourceDTO).isEmpty()) {
+            throw new NotFoundException();
+        }
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
-    @DeleteMapping({"/{resourceId}"})
+    @DeleteMapping(RESOURCE_PATH_ID)
     public ResponseEntity deleteResourceById(@PathVariable("resourceId") Long resourceId){
         log.debug("Delete Resource by Id - in controller");
-        resourceService.deleteResourceBy(resourceId);
+        if(!resourceService.deleteResourceBy(resourceId)) {
+            throw new NotFoundException();
+        }
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
-    @PatchMapping("{resourceId}")
+    @PatchMapping(RESOURCE_PATH_ID)
     public ResponseEntity updateResourcePatchById(@PathVariable("resourceId") Long resourceId,
-                                                  @RequestBody Resource resource){
+                                                  @Validated @RequestBody ResourceDTO resourceDTO){
 
-        resourceService.patchResourceById(resourceId, resource);
+        resourceService.patchResourceById(resourceId, resourceDTO);
 
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
+
+
+
 }
